@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="fr" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
+  <meta http-equiv="Content-Language" content="fr">
+  <meta name="robots" content="no-translate">
+  <title>Exam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
+  <style>
+    html, body {
+      translate: none !important; -webkit-user-select: none; user-select: none;
+      margin: 0; padding: 0; overscroll-behavior: none;
+    }
+    * { translate: none !important; box-sizing: border-box; }
+    :root {
+      --black: #0a0a0a; --navy: #0f172a; --ink: #1e293b; --slate: #475569;
+      --muted: #94a3b8; --line: #e2e8f0; --surface: #f8fafc; --white: #ffffff;
+      --blue: #2563eb; --green: #16a34a; --amber: #d97706; --red: #dc2626;
+      --purple: #7c3aed; --transition: 180ms ease;
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--surface); color: var(--ink); font-size: 16px; line-height: 1.7; padding-top: 56px; -webkit-font-smoothing: antialiased; }
+
+    /* ── Header ── */
+    header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: var(--navy); padding: 0 40px; height: 56px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    header h1 { margin: 0; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.04em; color: rgba(255,255,255,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #timer { display: none; font-weight: 700; font-size: 0.88rem; padding: 6px 16px; background: rgba(255,255,255,0.1); color: #fff; white-space: nowrap; border: 1px solid rgba(255,255,255,0.15); letter-spacing: 0.04em; transition: all 0.3s; }
+    #timer.urgent { background: var(--red); border-color: var(--red); }
+
+    /* ── Layout ── */
+    main { max-width: 720px; margin: 32px auto 80px; padding: 0 24px; }
+
+    /* ── Cards ── */
+    .card { background: var(--white); border: 1px solid var(--line); padding: 36px; margin-bottom: 24px; }
+    .card h2 { margin: 0 0 8px; font-size: 1.5rem; font-weight: 700; color: var(--black); }
+    .card p { color: var(--slate); font-size: 0.95rem; margin: 0 0 16px; }
+
+    /* ── Form ── */
+    label { display: block; font-weight: 600; font-size: 0.88rem; color: var(--black); margin: 16px 0 6px; letter-spacing: 0.02em; }
+    input[type="text"], input[type="email"], select, textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); font-size: 0.95rem; font-family: inherit; background: var(--white); color: var(--ink); transition: border-color var(--transition); }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); }
+    textarea { min-height: 180px; resize: vertical; -webkit-user-select: text; user-select: text; }
+    .ql-student-wrap .ql-toolbar  { border:2px solid #e2e8f0; border-bottom:none; border-radius:0; font-family:inherit; }
+    .ql-student-wrap .ql-container { border:2px solid #e2e8f0; border-radius:0; font-family:'Inter',system-ui,sans-serif; font-size:0.95rem; min-height:300px; }
+    .ql-student-wrap .ql-editor   { min-height:280px; font-family:inherit; font-size:inherit; line-height:1.7; padding:12px 14px; -webkit-user-select:text; user-select:text; }
+    .ql-student-wrap:focus-within .ql-toolbar,
+    .ql-student-wrap:focus-within .ql-container { border-color:#2563eb; }
+
+    /* ── Buttons ── */
+    button { background: var(--blue); color: #fff; border: none; padding: 13px 28px; cursor: pointer; font-size: 0.9rem; font-weight: 700; font-family: inherit; letter-spacing: 0.03em; transition: background var(--transition); }
+    button:hover { background: #1d4ed8; }
+    button.btn-light { background: var(--surface); color: var(--blue); border: 1.5px solid var(--line); }
+    button.btn-light:hover { background: var(--line); }
+    .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+    .btn-row.center { justify-content: center; }
+    .btn-row.right { justify-content: flex-end; }
+    .btn-row.between { justify-content: space-between; }
+
+    /* ── Loading ── */
+    #loadingScreen { text-align: center; padding: 80px 20px; color: var(--muted); }
+    .spinner { width: 36px; height: 36px; border: 3px solid var(--line); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Error ── */
+    #errorScreen { text-align: center; padding: 80px 20px; }
+    #errorScreen h2 { color: var(--red); }
+
+    /* ── Login card ── */
+    .login-eyebrow { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 6px; }
+    .login-title { font-size: 1.4rem; font-weight: 700; color: var(--black); letter-spacing: -0.02em; margin-bottom: 4px; }
+    .login-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 28px; }
+    .name-row { display: flex; gap: 10px; margin-bottom: 0; }
+    .name-row input { flex: 1; }
+
+    /* ── Confirm screen ── */
+    .confirm-heading-eyebrow { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 6px; }
+    .confirm-heading { font-size: 1.3rem; font-weight: 700; color: var(--black); letter-spacing: -0.02em; margin-bottom: 24px; }
+
+    /* Penalty callout */
+    .penalty-callout { border: 1.5px solid #fca5a5; background: #fff5f5; padding: 18px 20px; margin-bottom: 16px; }
+    .penalty-callout-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .penalty-callout-header svg { flex-shrink: 0; color: var(--red); }
+    .penalty-callout-title { font-size: 0.88rem; font-weight: 700; color: #991b1b; }
+    .penalty-callout ul { margin: 0; padding-left: 18px; font-size: 0.85rem; color: #7f1d1d; line-height: 1.8; }
+    .penalty-callout ul li + li { margin-top: 2px; }
+
+    /* Rules block */
+    .rules-block { border: 1px solid var(--line); background: var(--surface); padding: 16px 20px; margin-bottom: 20px; }
+    .rules-block-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
+    .rules-block ul { margin: 0; padding-left: 18px; font-size: 0.85rem; color: var(--slate); line-height: 1.8; }
+    .rules-block ul li + li { margin-top: 2px; }
+
+    /* Identity verification */
+    .confirm-verify-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
+    .confirm-item { background: var(--surface); padding: 12px 16px; border: 1px solid var(--line); margin-bottom: 8px; }
+    .confirm-item-label { font-size: 0.68rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
+    .confirm-item-val { font-size: 0.95rem; font-weight: 600; color: var(--black); }
+
+    /* Acknowledge checkbox */
+    .confirm-acknowledge { display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; border: 1.5px solid var(--line); background: var(--white); margin: 20px 0; cursor: pointer; transition: border-color var(--transition); }
+    .confirm-acknowledge:has(input:checked) { border-color: var(--green); background: #f0fdf4; }
+    .confirm-acknowledge input[type="checkbox"] { margin-top: 2px; width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--green); cursor: pointer; }
+    .confirm-acknowledge-text { font-size: 0.85rem; color: var(--ink); line-height: 1.5; }
+
+    /* ── Question cards ── */
+    .q-card { background: var(--white); border: 1.5px solid var(--line); padding: 24px; margin-bottom: 16px; transition: border-color var(--transition); }
+    .q-card.answered { border-color: var(--line); background: var(--white); }
+    .q-num { font-size: 0.65rem; font-weight: 700; color: var(--white); background: var(--navy); display: inline-block; padding: 3px 10px; margin-bottom: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .q-text { font-size: 0.95rem; font-weight: 600; color: var(--black); margin-bottom: 14px; line-height: 1.6; }
+
+    /* MCQ options */
+    .q-options { display: flex; flex-direction: column; gap: 8px; }
+    .q-option { display: flex; align-items: flex-start; gap: 10px; padding: 11px 14px; border: 1.5px solid var(--line); cursor: pointer; transition: all var(--transition); font-size: 0.9rem; color: var(--ink); line-height: 1.5; }
+    .q-option:hover { border-color: #93c5fd; background: #eff6ff; }
+    .q-option.selected { border-color: var(--blue); background: #eff6ff; }
+    .q-option input[type="radio"] { margin-top: 2px; flex-shrink: 0; accent-color: var(--blue); width: 15px; height: 15px; }
+
+    /* Open question */
+    .q-open-note { font-size: 0.82rem; color: var(--purple); font-weight: 600; background: #faf5ff; border: 1px solid #e9d5ff; padding: 8px 12px; margin-bottom: 10px; }
+    .word-count-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.82rem; }
+    .wc-hint { padding: 3px 10px; font-weight: 600; }
+    .hint-neutral { background: #f1f5f9; color: var(--slate); }
+    .hint-ok { background: #dcfce7; color: #166534; }
+
+    /* Media */
+    .q-media { margin-bottom: 14px; border: 1px solid var(--line); overflow: hidden; }
+    .q-media img { width: 100%; display: block; max-height: 320px; object-fit: contain; background: var(--surface); }
+    .q-media audio { display: none; }
+    .q-media video { width: 100%; display: block; }
+    .q-media iframe { width: 100%; height: 260px; border: none; display: block; }
+    .q-audio-player { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #fff; }
+    .q-audio-icon { flex-shrink: 0; }
+    .q-audio-play { width: 34px; height: 34px; border-radius: 50%; background: #2563eb; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .q-audio-replay { width: 28px; height: 28px; border: none; background: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .q-audio-time { font-size: 0.82rem; font-weight: 600; color: #475569; font-family: inherit; margin-left: auto; white-space: nowrap; }
+    /* ── Page navigation ── */
+    .answer-persist-notice { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; font-size: 0.82rem; padding: 10px 14px; margin-top: 16px; line-height: 1.5; }
+
+    /* ── Section two-column layout ── */
+    .sec-page-title { font-size:1rem; font-weight:700; color:#0f172a; padding:14px 20px 4px; background:#f1f5f9; border-left:4px solid #2563eb; }
+    .sec-page-instr  { font-size:0.82rem; color:#475569; padding:4px 20px 10px; background:#f1f5f9; border-left:4px solid #2563eb; margin-bottom:0; }
+    @media (min-width: 769px) {
+      #sectionPageHeader { width:calc(100vw - 96px); margin-left:calc(-50vw + 50% + 24px); }
+      #sectionSplitRow.has-attachment { display:flex; align-items:stretch; gap:24px; width:calc(100vw - 96px); margin-left:calc(-50vw + 50% + 24px); }
+      #sectionSplitRow.has-attachment #sectionMediaTop  { width:55%; flex-shrink:0; height:650px; overflow-y:auto; border:1.5px solid #e2e8f0; }
+      #sectionSplitRow.has-attachment #questionsContainer { width:45%; height:650px; overflow-y:auto; border:1.5px solid #e2e8f0; padding:0 16px; }
+      #sectionSplitRow.has-attachment #sectionMediaTop .q-media { height:100%; margin-bottom:0; }
+      #sectionSplitRow.has-attachment #sectionMediaTop .q-media embed { width:100%; height:100%; display:block; }
+    }
+    @media (max-width: 768px) {
+      #sectionSplitRow.has-attachment #sectionMediaTop { width:100%; height:500px; overflow-y:auto; -webkit-overflow-scrolling:touch; border-bottom:1px solid #e2e8f0; }
+      #sectionSplitRow.has-attachment #sectionMediaTop .q-media { height:100%; margin-bottom:0; }
+      #sectionSplitRow.has-attachment #sectionMediaTop .q-media embed { width:100%; height:100%; display:block; }
+      #sectionSplitRow.has-attachment #questionsContainer { width:100%; height:auto; }
+    }
+    #pageNav { display: none; align-items: center; gap: 10px; margin-top: 12px; }
+    .page-nav-btn { padding: 12px 24px; font-size: 0.88rem; font-weight: 700; font-family: inherit; border: 1.5px solid var(--line); background: var(--white); color: var(--ink); cursor: pointer; transition: all 180ms ease; }
+    .page-nav-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .page-nav-next { background: var(--blue); color: #fff; border-color: var(--blue); margin-left: auto; }
+    .page-nav-next:hover { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+
+    /* ── Progress ── */
+    .progress-bar-wrap { background: var(--line); height: 4px; margin-bottom: 24px; }
+    .progress-bar-fill { background: var(--blue); height: 100%; transition: width 0.3s; }
+    .progress-label { font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+
+    /* ── Question navigator ── */
+    .q-nav { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; padding: 16px 0 8px; }
+    .q-dot { width: 30px; height: 30px; border: 1.5px solid var(--line); background: var(--white); color: var(--muted); font-size: 0.68rem; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all var(--transition); flex-shrink: 0; }
+    .q-dot:hover { border-color: var(--blue); color: var(--blue); }
+    .q-dot.dot-answered { background: var(--green); border-color: var(--green); color: #fff; }
+    .q-dot.dot-open { background: var(--purple); border-color: var(--purple); color: #fff; }
+    .q-dot.dot-open.dot-answered { background: var(--green); border-color: var(--green); }
+
+    /* ── Anti-cheat overlay ── */
+    body.overlay-active { overflow: hidden; }
+    body.overlay-active header, body.overlay-active main { filter: blur(8px); pointer-events: none; }
+    #exitOverlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.9); backdrop-filter: blur(12px); z-index: 2000; align-items: center; justify-content: center; }
+    #exitOverlay > div { background: var(--white); max-width: 440px; width: 92%; padding: 28px; border-left: 4px solid var(--red); }
+    #exitOverlay h2 { margin: 0 0 10px; font-size: 1.25rem; color: var(--black); font-weight: 700; }
+    #exitOverlayStrike { font-size: 1.1rem; font-weight: 800; color: var(--red); margin-bottom: 10px; }
+    #exitOverlayMsg { font-size: 0.88rem; color: var(--slate); line-height: 1.6; margin-bottom: 14px; }
+    #exitOverlayCountText { font-size: 0.82rem; color: var(--muted); text-align: center; margin-bottom: 4px; }
+    #exitOverlayCountDig { font-size: 3rem; font-weight: 800; text-align: center; color: var(--red); margin-bottom: 20px; line-height: 1; }
+    #exitOverlayStay { background: var(--surface); color: var(--blue); border: 1.5px solid var(--line); }
+    #exitOverlayLeave { background: var(--red); }
+    #exitOverlayLeave:hover { background: #b91c1c; }
+    #unansweredModal { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.9); backdrop-filter: blur(12px); z-index: 2000; align-items: center; justify-content: center; }
+    #unansweredModal > div { background: var(--white); max-width: 440px; width: 92%; padding: 28px; border-left: 4px solid var(--amber); }
+    #unansweredModal h2 { margin: 0 0 8px; font-size: 1.1rem; color: var(--black); font-weight: 700; }
+    #unansweredModal p { font-size: 0.88rem; color: var(--slate); margin: 0 0 20px; line-height: 1.6; }
+    #unansweredModalCancel { background: var(--surface); color: var(--blue); border: 1.5px solid var(--line); }
+    #unansweredModalSubmit { background: var(--blue); }
+
+    /* ── Terminated ── */
+    #terminatedScreen { display: none; position: fixed; inset: 0; background: var(--navy); z-index: 3000; align-items: center; justify-content: center; text-align: center; padding: 40px; }
+    #terminatedScreen > div { background: var(--white); padding: 44px 36px; max-width: 460px; width: 92%; border-top: 4px solid var(--red); }
+
+    /* ── Success ── */
+    #successScreen { display: none; text-align: center; padding: 60px 20px; border-top: 4px solid var(--green); }
+
+    /* ── Warning banner (legacy) ── */
+    .warn-box { background: #fffbeb; border-left: 4px solid var(--amber); padding: 14px 18px; margin-bottom: 20px; font-size: 0.88rem; color: #78350f; line-height: 1.6; }
+
+    /* ── Pre-exam lang picker ── */
+    #preLangPicker { display:none; align-items:center; gap:2px; flex:0 0 auto; margin: 0 8px; }
+    .plp-btn { background:none; border:1px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.5); font-size:0.62rem; font-weight:700; letter-spacing:0.08em; padding:4px 9px; cursor:pointer; font-family:inherit; transition:all 0.15s; }
+    .plp-btn:hover { color:rgba(255,255,255,0.85); border-color:rgba(255,255,255,0.4); }
+    .plp-btn.active { background:rgba(255,255,255,0.12); color:#fff; border-color:rgba(255,255,255,0.45); }
+
+    /* ── Translation block overlay ── */
+    #translationBlockOverlay { display:none; position:fixed; inset:0; z-index:99999; background:#0f172a; align-items:center; justify-content:center; text-align:center; padding:40px; }
+    #translationBlockOverlay.show { display:flex; }
+
+    @media (max-width: 640px) {
+      body { padding-top: 56px; }
+      header { padding: 0 20px; }
+      .card { padding: 24px 16px; }
+      main { padding: 0 16px; }
+      .name-row { flex-direction: column; gap: 0; }
+    }
+
+    .q-progress-mobile { display: none; text-align: center; font-size: 0.875rem; color: var(--muted); padding: 8px 0 4px; }
+    .mobile-notif-notice { display: none; }
+    @media (max-width: 768px) {
+      .q-nav { display: none; }
+      .q-progress-mobile { display: block; }
+      .mobile-notif-notice { display: block; background: #fef9c3; border: 1px solid #fde68a; color: #92400e; font-size: 0.8rem; padding: 10px 14px; border-radius: 0; margin-bottom: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1 id="examTitleHeader">Chargement…</h1>
+    <div id="preLangPicker" role="group" aria-label="Interface language">
+      <button class="plp-btn active" id="plpFR" onclick="setPreExamLang('fr')">FR</button>
+      <button class="plp-btn" id="plpEN" onclick="setPreExamLang('en')">EN</button>
+    </div>
+    <div id="timer"></div>
+  </header>
+
+  <div id="translationBlockOverlay">
+    <div style="max-width:440px;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <h2 id="transBlockTitle" style="color:#fff;margin:16px 0 8px;font-size:1.1rem;font-weight:700;">Translation not permitted</h2>
+      <p id="transBlockMsg" style="color:rgba(255,255,255,0.55);font-size:0.88rem;line-height:1.6;margin:0;">Page translation is not allowed during this exam. Please disable browser translation and reload the page.</p>
+    </div>
+  </div>
+
+  <main>
+    <span id="langSentinel" style="display:none;">
+      This reference sentence is used only to detect automatic translation of the exam page.
+    </span>
+
+    <!-- Loading -->
+    <div id="loadingScreen">
+      <div class="spinner"></div>
+      <p>Chargement de l'épreuve…</p>
+    </div>
+
+    <!-- Error -->
+    <div id="errorScreen" style="display:none;" class="card">
+      <h2>Épreuve introuvable</h2>
+      <p id="errorMsg">Ce lien ne correspond à aucune épreuve publiée. Vérifiez l'adresse avec votre enseignant.</p>
+    </div>
+
+    <!-- Login -->
+    <section id="loginScreen" style="display:none;" class="card">
+      <div class="login-eyebrow" id="loginTitle">Exam Builder</div>
+      <div class="login-title" id="loginCardTitle">Commencer l'épreuve</div>
+      <p class="login-sub" id="loginSub"></p>
+
+      <label id="labelName">Nom et prénom</label>
+      <div class="name-row" style="margin-bottom:16px;">
+        <input type="text" id="inputLastName" placeholder="NOM" style="text-transform:uppercase;">
+        <input type="text" id="inputFirstName" placeholder="Prénom">
+      </div>
+
+      <label id="labelEmail">Adresse e-mail</label>
+      <input type="email" id="inputEmail" placeholder="votre.email@example.com" style="margin-bottom:16px;">
+
+      <!-- Groups dropdown — shown only when groups defined -->
+      <div id="groupRow" style="display:none;">
+        <label id="labelGroup">Groupe</label>
+        <select id="inputGroup" style="margin-bottom:16px;cursor:pointer;">
+          <option value="">Sélectionner votre groupe</option>
+        </select>
+        <div id="groupFixed" style="display:none;width:100%;padding:12px 14px;border:1.5px solid var(--line);font-size:0.95rem;font-family:inherit;background:var(--surface);color:var(--ink);margin-bottom:16px;"></div>
+      </div>
+
+      <label id="labelCode">Code d'accès</label>
+      <input type="text" id="inputCode" placeholder="Ex : AB3C7D" style="margin-bottom:28px;letter-spacing:0.08em;">
+
+      <button id="loginBtn" style="width:100%;padding:15px;">Continuer →</button>
+    </section>
+
+    <!-- Confirm — Screen 2: identity only -->
+    <section id="confirmScreen" style="display:none;" class="card">
+      <!-- Hidden: preserves applyUIStrings() reference -->
+      <span id="confirmRulesTitle" style="display:none;"></span>
+
+      <!-- Identity verification -->
+      <div class="confirm-verify-label" id="confirmVerifyLabel">Vos informations</div>
+      <div class="confirm-item"><div class="confirm-item-label" id="confirmNameLabel">NOM &amp; PRÉNOM</div><div class="confirm-item-val" id="confirmName"></div></div>
+      <div class="confirm-item"><div class="confirm-item-label" id="confirmEmailLabel">EMAIL</div><div class="confirm-item-val" id="confirmEmail"></div></div>
+      <div class="confirm-item" id="confirmGroupRow" style="display:none;"><div class="confirm-item-label" id="confirmGroupLabel">GROUPE</div><div class="confirm-item-val" id="confirmGroup"></div></div>
+      <p style="font-size:0.82rem;color:var(--muted);margin:10px 0 0;" id="confirmEditNote">Si quelque chose n'est pas correct, cliquez sur « Modifier » pour revenir à l'écran précédent.</p>
+
+      <div style="display:flex;justify-content:space-between;gap:12px;margin-top:24px;">
+        <button class="btn-light" id="confirmBackBtn">← Modifier</button>
+        <button id="confirmContinueBtn">Continuer →</button>
+      </div>
+    </section>
+
+    <!-- Rules — Screen 3: instructions, rules, privacy -->
+    <section id="rulesScreen" style="display:none;" class="card">
+      <!-- Back link -->
+      <div style="margin-bottom:16px;">
+        <button class="btn-light" id="rulesBackBtn" style="font-size:0.82rem;padding:6px 14px;">← Modifier</button>
+      </div>
+
+      <!-- Eyebrow + heading -->
+      <div class="confirm-heading-eyebrow" id="confirmTitle">Avant de commencer</div>
+      <div class="confirm-heading" id="confirmHeading">Lisez attentivement avant de commencer</div>
+
+      <!-- Consequences — red warning card -->
+      <div class="penalty-callout" id="confirmWarningBox">
+        <div class="penalty-callout-header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span class="penalty-callout-title" id="confirmWarningTitle">Sortie d'écran — soumission automatique</span>
+        </div>
+        <ul><li id="cw3"></li></ul>
+      </div>
+
+      <!-- What the system logs -->
+      <div id="monitoringDisclosure" style="margin:0 0 16px;padding:14px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-left:3px solid #94a3b8;">
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;margin-bottom:8px;" id="monitoringTitle">CE QUE LE SYSTÈME NOTE AUTOMATIQUEMENT</div>
+        <ul id="monitoringList" style="margin:0;padding-left:16px;font-size:0.8rem;color:#475569;line-height:1.9;"></ul>
+      </div>
+
+      <!-- Session journal note -->
+      <p style="font-size:0.82rem;color:#475569;margin:0 0 24px;" id="cw5"></p>
+
+      <!-- Mobile Do Not Disturb notice -->
+      <div class="mobile-notif-notice" id="mobileNotifNotice"></div>
+
+      <!-- Acknowledgement checkbox -->
+      <label class="confirm-acknowledge">
+        <input type="checkbox" id="confirmAcknowledge">
+        <span class="confirm-acknowledge-text" id="confirmAcknowledgeLabel">Je comprends que mon activité génère un journal de session transmis à mon enseignant</span>
+      </label>
+
+      <button id="confirmStartBtn" disabled style="width:100%;opacity:0.5;cursor:not-allowed;">Commencer l'épreuve →</button>
+    </section>
+
+    <!-- Exam questions -->
+    <section id="examScreen" style="display:none;">
+      <div class="progress-label" id="progressLabel"></div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      <div id="sectionPageHeader"></div>
+      <div id="sectionSplitRow">
+        <div id="sectionMediaTop"></div>
+        <div id="questionsContainer"></div>
+      </div>
+      <div class="q-nav" id="qNav"></div>
+      <div class="q-progress-mobile" id="qProgressMobile"></div>
+      <div id="answerPersistNotice" class="answer-persist-notice" style="display:none;"></div>
+      <div id="pageNav">
+        <button id="pagePrevBtn" type="button" class="page-nav-btn" style="display:none;"></button>
+        <button id="pageNextBtn" type="button" class="page-nav-btn page-nav-next"></button>
+      </div>
+      <div class="btn-row center" id="submitBtnRow" style="margin-top:8px;">
+        <button id="submitBtn">Envoyer ma copie →</button>
+      </div>
+    </section>
+
+    <!-- Already submitted (student returns after submitting) -->
+    <div id="submittedScreen" class="card" style="display:none;text-align:center;padding:60px 20px;">
+      <div style="display:flex;justify-content:center;margin-bottom:20px;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+      </div>
+      <h2 style="margin:0 0 12px;">Épreuve déjà soumise</h2>
+      <p style="color:var(--muted);">Votre copie a déjà été enregistrée. Vous pouvez fermer cette fenêtre.</p>
+    </div>
+
+    <!-- Success -->
+    <div id="successScreen" class="card">
+      <div style="display:flex;justify-content:center;margin-bottom:20px;">
+        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+      </div>
+      <h2 style="text-align:center;" id="successTitle"></h2>
+      <p id="successMsg"></p>
+      <p id="emailStatus" style="font-size:0.82rem;color:#64748b;text-align:center;margin-top:8px;"></p>
+    </div>
+  </main>
+
+  <!-- Terminated screen -->
+  <div id="terminatedScreen">
+    <div>
+      <div style="margin-bottom:20px;display:flex;justify-content:center;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h2 style="margin:0 0 10px;font-size:1.5rem;color:#0a0a0a;font-weight:700;">Accès bloqué</h2>
+      <p style="margin:0 0 14px;font-size:0.93rem;color:#475569;line-height:1.7;">
+        L'épreuve a été <strong>arrêtée automatiquement</strong> suite à plusieurs sorties de l'écran.
+        Il n'est pas possible de recommencer depuis cet appareil.
+      </p>
+      <p style="margin:0;font-size:0.82rem;color:#94a3b8;">Si vous pensez qu'il s'agit d'une erreur, contactez votre enseignant.</p>
+    </div>
+  </div>
+
+  <!-- Anti-cheat overlay -->
+  <div id="exitOverlay">
+    <div>
+      <h2>Quitter l'épreuve ?</h2>
+      <div id="exitOverlayStrike"></div>
+      <p id="exitOverlayMsg"></p>
+      <p id="exitOverlayCountText"></p>
+      <div id="exitOverlayCountDig">15</div>
+      <div class="btn-row" style="justify-content:flex-end; gap:10px; margin-top:0;">
+        <button id="exitOverlayStay">Rester dans l'épreuve</button>
+        <button id="exitOverlayLeave">Quitter</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="unansweredModal">
+    <div>
+      <h2 id="unansweredModalTitle"></h2>
+      <p  id="unansweredModalMsg"></p>
+      <div class="btn-row" style="justify-content:flex-end;gap:10px;margin-top:0;">
+        <button id="unansweredModalCancel"></button>
+        <button id="unansweredModalSubmit"></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ============================================================
+  //  EDGE FUNCTION CONFIG
+  // ============================================================
+  const EF_BASE = 'https://toxgihdyfzdymgidgvaq.supabase.co/functions/v1';
+
+  async function efFetch(fn, body) {
+    const res = await fetch(`${EF_BASE}/${fn}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    return data;
+  }
+
+  // ============================================================
+  //  STATE
+  // ============================================================
+  let EXAM = null;           // exam row from Supabase
+  let QUESTIONS = [];        // questions array
+  let examActive = false;
+  let examSubmitted = false;
+  let isStartingExam = false;
+  let violationCount = 0;
+  const MAX_VIOLATIONS = 3;
+  const MAX_WARNINGS = 2;
+  let exitPromptOpen = false;
+  let antiCheatSuspendedUntil = 0;
+  let safeBlurUntil = 0;
+  let exitCountdownTimer = null;
+  let exitSecondsRemaining = 0;
+  let lastSubmitAttempt = 0;
+  let timerInterval = null;
+  let examDeadline = null;
+  const sessionEvents = [];
+  let studentName = '';
+  let studentEmail = '';
+  let attemptId    = null;
+  let sessionToken = null;
+  let TERMINATED_KEY = '';
+  let uiLang = 'fr';
+  let SHUFFLE_MAP = {};   // { "qIdx": [originalIndices...] } — set once at exam start
+  let PAGES = [];         // page-break grouping built once at exam start
+  let currentPage = 0;
+  let POOL_SELECTION = {}; // { sectionId: [nonSectionQIdx, ...] } — fixed at exam start
+  let isReconnect = false;
+  let autosaveTimer = null;
+  let lastSavedAnswers = null;
+  let VISIBLE_TOTAL = 0; // count of questions visible after pool selection
+  let urlGroup = null;   // pre-selected group from ?group= URL param
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+  // ============================================================
+  //  SHUFFLE HELPERS
+  // ============================================================
+  function fisherYates(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  function generateShuffleMap() {
+    const map = {};
+    QUESTIONS.forEach((q, idx) => {
+      if (q.type === 'mcq') {
+        const count = [q.option_a, q.option_b, q.option_c, q.option_d].filter(Boolean).length;
+        map[String(idx)] = fisherYates(Array.from({ length: count }, (_, i) => i));
+      }
+    });
+    return map;
+  }
+
+  // ============================================================
+  //  BOOT — read ?id= from URL, fetch exam
+  // ============================================================
+  async function boot() {
+    const params = new URLSearchParams(window.location.search);
+    const shareId = params.get('id');
+    urlGroup = params.get('group') || null;
+
+    if (!shareId) {
+      showError('Aucun identifiant d\'épreuve dans l\'URL. Vérifiez le lien avec votre enseignant.');
+      return;
+    }
+
+    TERMINATED_KEY = 'terminated_exam_' + shareId;
+
+    if (params.get('debug') === '1') {
+      localStorage.removeItem(TERMINATED_KEY);
+    }
+
+    // Detect mid-exam reconnect — restore shuffle map from cache so order is preserved
+    const _cachedAttemptId    = localStorage.getItem('examAttemptId_' + shareId);
+    const _cachedShuffleMap   = localStorage.getItem('examShuffleCache_' + shareId);
+    const _cachedSessionToken = localStorage.getItem('examSessionToken_' + shareId);
+    if (_cachedAttemptId && _cachedShuffleMap && _cachedSessionToken) {
+      try {
+        SHUFFLE_MAP  = JSON.parse(_cachedShuffleMap);
+        attemptId    = _cachedAttemptId;
+        sessionToken = _cachedSessionToken;
+        isReconnect  = true;
+      } catch(e) {
+        localStorage.removeItem('examAttemptId_' + shareId);
+        localStorage.removeItem('examShuffleCache_' + shareId);
+        localStorage.removeItem('examSessionToken_' + shareId);
+      }
+    }
+
+    // Retake bypass: teacher issued a one-time token — validated server-side
+    const retakeToken = params.get('retake');
+    if (retakeToken) {
+      const retakeRes = await efFetch('exam-retake', { retake_token: retakeToken }).catch(() => null);
+      if (retakeRes && retakeRes.attempt_id) {
+        // Valid token — clear all local blocks and reconnect cache so student starts fresh
+        localStorage.removeItem(TERMINATED_KEY);
+        localStorage.removeItem('submitted_' + shareId);
+        localStorage.removeItem('examAttemptId_' + shareId);
+        localStorage.removeItem('examShuffleCache_' + shareId);
+        localStorage.removeItem('examSessionToken_' + shareId);
+        SHUFFLE_MAP = {}; isReconnect = false;
+        // Store retake credentials — startExam() will use these and skip exam-start
+        attemptId    = retakeRes.attempt_id;
+        sessionToken = retakeRes.session_token;
+      } else {
+        showError('Ce lien de reprise est invalide ou a déjà été utilisé. Contactez votre enseignant.');
+        return;
+      }
+    } else {
+      if (localStorage.getItem(TERMINATED_KEY) === '1') {
+        showTerminated(); return;
+      }
+      // Check if student already submitted this exam
+      if (localStorage.getItem('submitted_' + shareId) === '1') {
+        showSubmittedScreen(); return;
+      }
+    }
+
+    try {
+      // Add 10-second timeout so spinner never hangs forever
+      const fetchWithTimeout = (promise, ms) => Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Délai dépassé — vérifiez votre connexion.')), ms))
+      ]);
+
+      // Fetch public exam metadata for the login screen (no access code required)
+      const examInfo = await fetchWithTimeout(
+        efFetch('exam-start', { share_id: shareId }),
+        10000
+      );
+
+      if (!examInfo || examInfo.error) {
+        showError('Épreuve introuvable ou non publiée. Vérifiez le lien avec votre enseignant. (id: ' + shareId + ')');
+        return;
+      }
+      // Populate EXAM with public metadata only — exam_id and QUESTIONS loaded in startExam()
+      EXAM = {
+        share_id:     shareId,
+        title:        examInfo.title         || '',
+        duration_mins: examInfo.duration_mins || 0,
+        lang:         examInfo.lang          || 'fr',
+        groups:       examInfo.groups        || null,
+        instructions: examInfo.instructions  || null,
+      };
+
+      // Set exam language for UI
+      uiLang = EXAM.lang || 'fr';
+      document.getElementById('plpFR').classList.toggle('active', uiLang === 'fr');
+      document.getElementById('plpEN').classList.toggle('active', uiLang === 'en');
+
+      // Update page title
+      document.getElementById('examTitleHeader').textContent = EXAM.title;
+      document.title = EXAM.title;
+
+      // Populate groups dropdown (language-aware — re-populated in applyUIStrings too)
+      window._examGroupsRaw = EXAM.groups;
+      applyUIStrings(uiLang);
+      lockGroupFromUrl();
+
+      // Acknowledge checkbox enables start button
+      document.getElementById('confirmAcknowledge').addEventListener('change', function() {
+        const btn = document.getElementById('confirmStartBtn');
+        btn.disabled = !this.checked;
+        btn.style.opacity = this.checked ? '1' : '0.5';
+        btn.style.cursor  = this.checked ? 'pointer' : 'not-allowed';
+      });
+
+      // Show login + pre-exam lang picker
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'block';
+      document.getElementById('preLangPicker').style.display = 'flex';
+
+    } catch (err) {
+      showError('Erreur de chargement : ' + err.message);
+    }
+  }
+
+  function showError(msg) {
+    window.location.href = 'error.html?title=Exam+not+found&msg=' + encodeURIComponent(msg) + '&code=404';
+  }
+
+  function showSubmittedScreen() {
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('terminatedScreen').style.display = 'none';
+    document.getElementById('submittedScreen').style.display = 'flex';
+  }
+
+  function showTerminated() {
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('terminatedScreen').style.display = 'flex';
+  }
+
+  // ============================================================
+  //  UI STRINGS — bilingual based on exam lang
+  // ============================================================
+  function getUIStrings(l) {
+    const isFR = l !== 'en';
+    return {
+      loginCardTitle: isFR ? "Commencer l'épreuve" : 'Start the exam',
+      loginSub:       isFR ? "Durée de l'épreuve :" : 'Exam duration:',
+      minutes:        isFR ? 'minutes.' : 'minutes.',
+      labelName:      isFR ? 'Nom et prénom' : 'Full name',
+      labelEmail:     isFR ? 'Adresse e-mail' : 'Email address',
+      labelGroup:     isFR ? 'Groupe' : 'Group',
+      labelCode:      isFR ? "Code d'accès" : 'Access code',
+      loginBtn:          isFR ? 'Continuer →' : 'Continue →',
+      placeholderLast:   isFR ? 'NOM' : 'LAST NAME',
+      placeholderFirst:  isFR ? 'Prénom' : 'First name',
+      placeholderEmail:  isFR ? 'votre.email@exemple.com' : 'your.email@example.com',
+      selectGroup:       isFR ? 'Sélectionner votre groupe' : 'Select your group',
+      confirmTitle:   isFR ? 'Avant de commencer' : 'Before you begin',
+      confirmHeading: isFR ? 'Lisez attentivement avant de commencer' : 'Read carefully before you start',
+      warningTitle:   isFR ? "Sortie d'écran — soumission automatique" : 'Screen exit — automatic submission',
+      rulesTitle:     isFR ? "Conditions de l'épreuve" : 'Exam conditions',
+      verifyLabel:    isFR ? 'Vos informations' : 'Your details',
+      nameLabel:      isFR ? 'NOM & PRÉNOM' : 'FULL NAME',
+      emailLabel:     'EMAIL',
+      groupLabel:     isFR ? 'Groupe' : 'Group',
+      editNote:       isFR ? "Si quelque chose n'est pas correct, cliquez sur « Modifier » pour revenir à l'écran précédent." : "If anything is incorrect, click « Edit » to return to the previous screen",
+      backBtn:        isFR ? '← Modifier' : '← Edit',
+      startBtn:       isFR ? "Commencer l'épreuve →" : 'Start exam →',
+      continueBtn:    isFR ? 'Continuer →' : 'Continue →',
+      privacyLink:    isFR ? 'Politique de confidentialité' : 'Privacy Policy',
+      acknowledgeLabel: isFR
+        ? 'J\'ai lu et j\'accepte les conditions de l\'épreuve et la <a href="privacy.html" target="_blank" rel="noopener noreferrer" style="color:#2563eb;">politique de confidentialité</a>'
+        : 'I have read and accept the exam conditions and the <a href="privacy.html" target="_blank" rel="noopener noreferrer" style="color:#2563eb;">privacy policy</a>',
+      cw1: isFR ? "L'épreuve se déroule en <strong>plein écran</strong>." : "The exam runs in <strong>full-screen mode</strong>.",
+      cw2: isFR ? "Si vous quittez la fenêtre ou changez d'application, un <strong>message d'avertissement</strong> apparaît." : "If you leave the window or switch applications, a <strong>warning message</strong> will appear.",
+      cw3: isFR ? "<strong>Sorties de fenêtre et sorties du plein écran</strong> : vous disposez de 15 secondes pour revenir. À partir de 3 incidents, votre copie est soumise automatiquement et la session est définitivement verrouillée" : "<strong>Window exits and fullscreen exits</strong>: you have 15 seconds to return. From 3 incidents, your paper is automatically submitted and your session is permanently locked",
+      cw4: isFR ? "Après <strong>3 sorties détectées</strong>, votre copie est <strong>envoyée automatiquement</strong>, l'épreuve se termine et <strong>la session est définitivement verrouillée</strong> — aucune reconnexion ne sera possible." : "After <strong>3 detected exits</strong>, your work is <strong>submitted automatically</strong>, the exam ends, and <strong>the session is permanently locked</strong> — re-entry will not be permitted.",
+      cw5: isFR ? "Toute autre activité est notée dans votre journal de session et transmise à votre enseignant à la fin de l'épreuve." : "All other activity is noted in your session journal and sent to your instructor at the end of the exam.",
+      monitoringTitle: isFR ? 'CE QUE LE SYSTÈME NOTE AUTOMATIQUEMENT' : 'WHAT THE SYSTEM LOGS AUTOMATICALLY',
+      monitoringItems: isFR ? [
+        'Sorties de fenêtre et changements d\'onglet',
+        'Sorties du plein écran',
+        'Tentatives de capture d\'écran',
+        'Tentatives de copier-coller',
+      ] : [
+        'Window exits and tab changes',
+        'Fullscreen exits',
+        'Screenshot attempts',
+        'Copy-paste attempts',
+      ],
+      successTitle: isFR ? 'Épreuve soumise !' : 'Exam submitted!',
+      successMsg:   isFR ? 'Votre copie a bien été enregistrée. Vous pouvez fermer cette fenêtre.' : 'Your answers have been recorded. You may close this window.',
+      successEmail: isFR ? 'Vos résultats vous seront communiqués par votre enseignant.' : 'Your results will be shared by your teacher.',
+      alertFillAll: isFR ? 'Merci de remplir tous les champs.' : 'Please fill in all fields.',
+      alertEmail:   isFR ? 'Adresse e-mail invalide.' : 'Invalid email address.',
+      alertGroup:   isFR ? 'Merci de sélectionner votre groupe.' : 'Please select your group.',
+      alertCode:    isFR ? "Code d'accès invalide." : 'Invalid access code.',
+      questionOf:   isFR ? 'sur' : 'of',
+      nextSection: isFR ? 'Section suivante →' : 'Next section →',
+      prevSection: isFR ? '← Section précédente' : '← Previous section',
+      answerPersistNotice: isFR
+        ? 'Vos réponses sont sauvegardées au fur et à mesure. Vous pouvez revenir en arrière et modifier vos réponses à tout moment avant de soumettre.'
+        : 'Your answers are saved as you go. You can go back and change your responses at any time before submitting.',
+      mobileNotifNotice: isFR
+        ? '📵 Avant de commencer, activez le mode « Ne pas déranger » et désactivez les notifications pour éviter toute interruption pendant l\'épreuve.'
+        : '📵 Before starting, enable Do Not Disturb mode and turn off notifications to avoid any interruption during the exam.',
+      unansweredTitle:  isFR ? 'Questions sans réponse' : 'Unanswered questions',
+      unansweredMsg:    isFR ? 'Vous avez {n} question(s) sans réponse. Voulez-vous quand même soumettre votre copie ?' : 'You have {n} unanswered question(s). Do you still want to submit?',
+      unansweredCancel: isFR ? 'Annuler' : 'Cancel',
+      unansweredSubmit: isFR ? 'Soumettre quand même' : 'Submit anyway',
+    };
+  }
+
+
+
+  // ============================================================
+  //  LOGIN
+  // ============================================================
+  document.getElementById('loginBtn').addEventListener('click', () => {
+    try {
+      const lastName  = document.getElementById('inputLastName').value.trim().toUpperCase();
+      const firstName = document.getElementById('inputFirstName').value.trim();
+      const email     = document.getElementById('inputEmail').value.trim();
+      const code      = document.getElementById('inputCode').value.trim().toUpperCase();
+      const groupEl   = document.getElementById('inputGroup');
+      const group     = groupEl ? groupEl.value : '';
+      const UI = window.UI || getUIStrings('fr');
+
+      // DEBUG code clears session lock for testing
+      if (code === 'DEBUG') { localStorage.removeItem(TERMINATED_KEY); }
+
+      if (localStorage.getItem(TERMINATED_KEY) === '1') { showTerminated(); return; }
+
+      if (!lastName || !firstName || !email) { alert(UI.alertFillAll); return; }
+      if (!email.includes('@')) { alert(UI.alertEmail); return; }
+
+      const groupRow = document.getElementById('groupRow');
+      if (groupRow && groupRow.style.display !== 'none' && !group) { alert(UI.alertGroup); return; }
+
+      // Access code presence check — full validation happens server-side in exam-start
+      if (code !== 'DEBUG' && !code) { alert(UI.alertCode); return; }
+
+      studentName  = lastName + ' ' + firstName;
+      studentEmail = email;
+
+      document.getElementById('confirmName').textContent  = studentName;
+      document.getElementById('confirmEmail').textContent = studentEmail;
+
+      const confirmGroupRow = document.getElementById('confirmGroupRow');
+      if (group && confirmGroupRow) {
+        document.getElementById('confirmGroup').textContent = group;
+        confirmGroupRow.style.display = 'block';
+        window._studentGroup = group;
+      }
+
+
+
+      document.getElementById('loginScreen').style.display   = 'none';
+      document.getElementById('confirmScreen').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch(err) {
+      console.error('Login error:', err);
+      alert('Erreur : ' + err.message);
+    }
+  });
+
+  document.getElementById('inputLastName').addEventListener('input', function() {
+    this.value = this.value.toUpperCase();
+  });
+
+  document.getElementById('confirmBackBtn').addEventListener('click', () => {
+    // Reset acknowledge checkbox so it must be re-checked on return
+    const cb = document.getElementById('confirmAcknowledge');
+    if (cb) { cb.checked = false; }
+    const btn = document.getElementById('confirmStartBtn');
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed'; }
+    document.getElementById('confirmScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display   = 'block';
+  });
+
+  document.getElementById('confirmContinueBtn').addEventListener('click', () => {
+    document.getElementById('confirmScreen').style.display = 'none';
+    document.getElementById('rulesScreen').style.display   = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  document.getElementById('rulesBackBtn').addEventListener('click', () => {
+    document.getElementById('rulesScreen').style.display   = 'none';
+    document.getElementById('confirmScreen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  document.getElementById('confirmStartBtn').addEventListener('click', startExam);
+
+  // ============================================================
+  //  START EXAM
+  // ============================================================
+  async function startExam() {
+    document.getElementById('rulesScreen').style.display   = 'none';
+    document.getElementById('preLangPicker').style.display = 'none';
+
+    if (isReconnect) {
+      // Reconnect — credentials and SHUFFLE_MAP already restored from localStorage in boot()
+      violationCount = 1;
+      logEvent('Reconnexion détectée', 'La page a été rechargée — violation comptabilisée');
+    } else if (attemptId && sessionToken) {
+      // Retake — credentials set by exam-retake in boot(), generate fresh shuffle for this session
+      SHUFFLE_MAP = generateShuffleMap();
+      localStorage.setItem('examAttemptId_' + EXAM.share_id, attemptId);
+      localStorage.setItem('examShuffleCache_' + EXAM.share_id, JSON.stringify(SHUFFLE_MAP));
+      localStorage.setItem('examSessionToken_' + EXAM.share_id, sessionToken);
+    } else {
+      // Fresh start — generate shuffle and call exam-start (validates code + creates attempt)
+      SHUFFLE_MAP = generateShuffleMap();
+      let startRes = null;
+      try {
+        startRes = await efFetch('exam-start', {
+          share_id:      EXAM.share_id,
+          access_code:   document.getElementById('inputCode').value.trim(),
+          student_name:  studentName,
+          student_email: studentEmail,
+          group_name:    window._studentGroup || null,
+          shuffle_map:   SHUFFLE_MAP,
+        });
+      } catch (err) {
+        console.error('exam-start failed:', err);
+        document.getElementById('rulesScreen').style.display = 'block';
+        const btn = document.getElementById('confirmStartBtn');
+        if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }
+        const msg = err.message === 'Invalid access code'
+          ? (EXAM.lang === 'en' ? 'Invalid access code. Please check and try again.' : 'Code d\'accès incorrect. Veuillez vérifier et réessayer.')
+          : 'Impossible de démarrer l\'épreuve. Vérifiez votre connexion et réessayez.';
+        alert(msg);
+        return;
+      }
+      attemptId    = startRes.attempt_id;
+      sessionToken = startRes.session_token;
+      EXAM.id      = startRes.exam_id;
+      console.log('exam started', { attemptId, sessionToken });
+      startAutosave();
+      localStorage.setItem('examAttemptId_' + EXAM.share_id, attemptId);
+      localStorage.setItem('examShuffleCache_' + EXAM.share_id, JSON.stringify(SHUFFLE_MAP));
+      localStorage.setItem('examSessionToken_' + EXAM.share_id, sessionToken);
+    }
+
+    // Load questions via edge function — requires session_token, never sends correct_index
+    try {
+      let qData = null;
+      for (let _attempt = 0; _attempt < 3; _attempt++) {
+        try { qData = await efFetch('exam-questions', { attempt_id: attemptId, session_token: sessionToken }); break; }
+        catch (retryErr) { if (_attempt === 2) throw retryErr; await new Promise(r => setTimeout(r, 1000)); }
+      }
+      const allItems = qData.questions || [];
+      window.ALL_ITEMS = allItems;
+      QUESTIONS = allItems.filter(q => q.type !== 'section');
+      if (QUESTIONS.length === 0) {
+        showError('Cette épreuve ne contient pas encore de questions.');
+        return;
+      }
+      if (!isReconnect) {
+        SHUFFLE_MAP = generateShuffleMap();
+        localStorage.setItem('examShuffleCache_' + EXAM.share_id, JSON.stringify(SHUFFLE_MAP));
+      }
+    } catch (err) {
+      console.error('exam-questions failed:', err);
+      if (isReconnect && err.message === 'Unauthorized') {
+        localStorage.removeItem('examAttemptId_'    + EXAM.share_id);
+        localStorage.removeItem('examSessionToken_' + EXAM.share_id);
+        localStorage.removeItem('examShuffleCache_' + EXAM.share_id);
+        localStorage.removeItem('examDeadline_'     + EXAM.share_id);
+        attemptId    = null;
+        sessionToken = null;
+        isReconnect  = false;
+        const msg = uiLang === 'en'
+          ? 'Your previous session has expired. Please start again.'
+          : 'Votre session précédente a expiré. Veuillez recommencer.';
+        document.getElementById('loginSub').textContent        = msg;
+        document.getElementById('rulesScreen').style.display   = 'none';
+        document.getElementById('loginScreen').style.display   = 'block';
+        document.getElementById('preLangPicker').style.display = 'flex';
+        return;
+      }
+      showError('Impossible de charger les questions. Vérifiez votre connexion et réessayez.');
+      return;
+    }
+
+    // Set up timer
+    examDeadline = Date.now() + EXAM.duration_mins * 60 * 1000;
+    localStorage.setItem('examDeadline_' + EXAM.share_id, String(examDeadline));
+
+    examActive    = true;
+    examSubmitted = false;
+    violationCount = 0;
+
+    logEvent('Exam started', studentName);
+
+    isStartingExam = true;
+    setTimeout(() => { isStartingExam = false; }, 1200);
+
+    // Fullscreen
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+
+    // Show timer
+    const timerEl = document.getElementById('timer');
+    timerEl.style.display = 'inline-block';
+    startTimer();
+
+    // Build page structure and render
+    buildPages();
+    initPoolSelection();
+    VISIBLE_TOTAL = QUESTIONS.reduce((count, q) => {
+      const poolList = POOL_SELECTION[q._sectionId];
+      return (!poolList || poolList.includes(q._qIdx)) ? count + 1 : count;
+    }, 0);
+    buildQuestions();    // unchanged — renders all question cards
+    buildNavigator();    // unchanged — builds all nav dots
+    markDOMPageIndices(); // post-marks each card/divider with its page index
+    showPage(0);         // show first page, hide the rest
+
+    document.getElementById('examScreen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ============================================================
+  //  BUILD QUESTIONS
+  // ============================================================
+  function buildQuestions() {
+    const container = document.getElementById('questionsContainer');
+    container.innerHTML = '';
+
+    let questionCounter = 0; // counts only answerable questions
+    let visibleRank = 0;
+
+    (window.ALL_ITEMS || QUESTIONS).forEach((item) => {
+      // Render section as a visual heading divider
+      if (item.type === 'section') {
+        const sec = document.createElement('div');
+        sec.className = 'section-divider';
+        sec.style.cssText = 'margin:28px 0 4px 0;padding:14px 20px 10px;background:#f1f5f9;border-left:4px solid #2563eb;';
+        const title = document.createElement('div');
+        title.style.cssText = 'font-size:1rem;font-weight:700;color:#0f172a;letter-spacing:-0.01em;';
+        title.textContent = item.question_text || item.title || '';
+        sec.appendChild(title);
+        if (item.option_a) { // instructions stored in option_a for sections
+          const instr = document.createElement('div');
+          instr.style.cssText = 'font-size:0.82rem;color:#475569;margin-top:4px;';
+          instr.innerHTML = item.option_a || '';
+          sec.appendChild(instr);
+        }
+        const meta = document.createElement('div');
+        meta.style.cssText = 'font-size:0.78rem;color:#64748b;margin-top:4px;';
+        const qCount = item.pool_draw || item.pool_total || null;
+        const pts = item.max_points;
+        const parts = [];
+        if (qCount) parts.push(qCount + ' question' + (qCount !== 1 ? 's' : ''));
+        if (pts) parts.push(pts + ' pt' + (pts !== 1 ? 's' : ''));
+        if (parts.length) { meta.textContent = parts.join(' · '); sec.appendChild(meta); }
+        container.appendChild(sec);
+        return; // skip q-card rendering for sections
+      }
+
+      const idx = questionCounter++;
+      const q   = item;
+
+      const poolList = POOL_SELECTION[item._sectionId];
+      const isVisible = !poolList || poolList.includes(item._qIdx);
+      if (isVisible) visibleRank++;
+
+      const div = document.createElement('div');
+      div.className = 'q-card';
+      div.dataset.idx = idx;
+      div.dataset.type = q.type;
+
+      // Number badge
+      const num = document.createElement('div');
+      num.className = 'q-num';
+      num.textContent = 'Question ' + visibleRank + ' / ' + VISIBLE_TOTAL;
+      div.appendChild(num);
+
+      // Media (if any)
+      if (q.media_src) {
+        const mediaDiv = document.createElement('div');
+        mediaDiv.className = 'q-media';
+        if (q.media_type === 'image') {
+          mediaDiv.innerHTML = `<img src="${q.media_src}" alt="Question media">`;
+        } else if (q.media_type === 'audio') {
+          const audio = document.createElement('audio');
+          audio.controls = true;
+          audio.src = q.media_src;
+          audio.preload = 'metadata';
+          audio.style.cssText = 'width:100%;display:block;margin-bottom:8px;';
+          audio.addEventListener('play', () => { armSafeBlur(3000); }, { passive: true });
+          mediaDiv.appendChild(audio);
+        } else if (q.media_type === 'video') {
+          // YouTube / Vimeo embed or direct video
+          const src = q.media_src;
+          if (src.includes('youtube') || src.includes('youtu.be') || src.includes('vimeo')) {
+            let embedUrl = src;
+            if (src.includes('watch?v=')) embedUrl = 'https://www.youtube.com/embed/' + src.split('watch?v=')[1].split('&')[0];
+            else if (src.includes('youtu.be/')) embedUrl = 'https://www.youtube.com/embed/' + src.split('youtu.be/')[1];
+            mediaDiv.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+            mediaDiv.addEventListener('click', () => armSafeBlur(4000));
+          } else {
+            mediaDiv.innerHTML = `<video controls src="${src}" style="width:100%;"></video>`;
+            mediaDiv.querySelector('video').addEventListener('play', () => armSafeBlur(3000));
+          }
+        } else if (q.media_type === 'pdf') {
+          fetch(q.media_src)
+            .then(r => r.blob())
+            .then(blob => {
+              const blobUrl = URL.createObjectURL(blob);
+              mediaDiv.innerHTML = `<embed src="${blobUrl}" type="application/pdf" style="width:100%;height:320px;display:block;">`;
+            })
+            .catch(() => {
+              mediaDiv.innerHTML = `<div style="padding:12px 16px;background:#fef9c3;border:1px solid #fde68a;font-size:0.88rem;color:#92400e;">Le document n'a pas pu être affiché. Contactez votre enseignant.</div>`;
+            });
+        }
+        div.appendChild(mediaDiv);
+      }
+
+      // Question text
+      const qText = document.createElement('div');
+      qText.className = 'q-text';
+      qText.innerHTML = q.question_text || '';
+      div.appendChild(qText);
+
+      if (q.type === 'open') {
+        // Written question
+        const note = document.createElement('div');
+        note.className = 'q-open-note';
+        note.textContent = 'Réponse rédigée — correction par l\'enseignant';
+        div.appendChild(note);
+
+        const Delta = Quill.import('delta');
+        const editorWrap = document.createElement('div');
+        editorWrap.className = 'ql-student-wrap';
+        div.appendChild(editorWrap);
+
+        const quill = new Quill(editorWrap, {
+          theme: 'snow',
+          modules: { toolbar: [['bold','italic','underline'],[{list:'ordered'},{list:'bullet'}]] },
+        });
+
+        // Block all paste; log it
+        quill.clipboard.addMatcher(Node.ELEMENT_NODE, () => new Delta());
+        quill.root.addEventListener('paste', e => { e.preventDefault(); logEvent('Paste attempt blocked', 'q' + idx); });
+
+        // Suppress false anti-cheat on editor focus
+        quill.on('selection-change', range => { if (range) armSafeBlur(2000); });
+
+        // Copy logging
+        quill.root.addEventListener('copy', () => {
+          logEvent('Answer copied from text box', `q${idx} – ${(window.getSelection()?.toString().length||0)} chars`);
+        });
+
+        // Disable spellcheck / autocorrect / translate on editor element
+        const qlEditor = editorWrap.querySelector('.ql-editor');
+        if (qlEditor) {
+          qlEditor.setAttribute('spellcheck','false');
+          qlEditor.setAttribute('autocorrect','off');
+          qlEditor.setAttribute('autocapitalize','off');
+          qlEditor.setAttribute('translate','no');
+        }
+
+        // Word count + answered state on content change
+        quill.on('text-change', () => {
+          const text = quill.getText().trim();
+          div.classList.toggle('answered', text.length > 0);
+          updateProgress();
+          updateQuillWordCount(quill, div);
+        });
+
+        div._quill = quill;
+
+        const wcRow = document.createElement('div');
+        wcRow.className = 'word-count-row';
+        wcRow.innerHTML = `<span class="wc-count">Mots : 0</span><span class="wc-hint hint-neutral">Rédigez votre réponse</span>`;
+        div.appendChild(wcRow);
+
+      } else {
+        // MCQ — render in shuffle map order; each label carries data-original-index for scoring
+        const allOpts = [q.option_a, q.option_b, q.option_c, q.option_d].filter(Boolean);
+        const shuffleOrder = SHUFFLE_MAP[String(idx)] || allOpts.map((_, i) => i);
+        const optsDiv = document.createElement('div');
+        optsDiv.className = 'q-options';
+
+        shuffleOrder.forEach((originalIndex) => {
+          const opt = allOpts[originalIndex];
+          if (!opt) return;
+          const label = document.createElement('label');
+          label.className = 'q-option';
+          label.dataset.originalIndex = String(originalIndex);
+          label.innerHTML = `<input type="radio" name="q${idx}" value="${originalIndex}"><span>${opt}</span>`;
+          label.addEventListener('click', () => {
+            div.querySelectorAll('.q-option').forEach(l => l.classList.remove('selected'));
+            label.classList.add('selected');
+            div.classList.add('answered');
+            updateProgress();
+          });
+          optsDiv.appendChild(label);
+        });
+        div.appendChild(optsDiv);
+      }
+
+      container.appendChild(div);
+    });
+
+    updateProgress();
+  }
+
+  // ============================================================
+  //  PAGE-BREAK NAVIGATION
+  // ============================================================
+  function buildPages() {
+    let pageIdx = 0;
+    let nonSectionIdx = 0;
+    let currentSectionId = null;
+    (window.ALL_ITEMS || []).forEach((item, i) => {
+      if (item.type === 'section') {
+        if (item.page_break && i > 0) pageIdx++;
+        currentSectionId = item.id || null;
+      }
+      item._pageIdx = pageIdx;
+      item._sectionId = currentSectionId;
+      if (item.type !== 'section') item._qIdx = nonSectionIdx++;
+    });
+    PAGES = [];
+    for (let p = 0; p <= pageIdx; p++) {
+      const pageItems = (window.ALL_ITEMS || []).filter(x => x._pageIdx === p);
+      const leadSection = pageItems.find(x => x.type === 'section' && x.page_break) || null;
+      const qIndices = pageItems.filter(x => x.type !== 'section').map(x => x._qIdx);
+      PAGES.push({ leadSection, qIndices });
+    }
+  }
+
+  function initPoolSelection() {
+    const cacheKey = 'poolSelectionCache_' + EXAM.share_id + '_' + attemptId;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) { try { POOL_SELECTION = JSON.parse(cached); return; } catch(e) {} }
+    POOL_SELECTION = {};
+    let currentSec = null;
+    let currentItems = [];
+    function flushSection() {
+      if (!currentSec || !currentSec.pool_draw) return;
+      if (currentSec.pool_draw >= currentItems.length) return;
+      const arr = currentItems.slice();
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      POOL_SELECTION[currentSec.id] = arr.slice(0, currentSec.pool_draw);
+    }
+    (window.ALL_ITEMS || []).forEach(item => {
+      if (item.type === 'section') {
+        flushSection();
+        currentSec = (item.pool_draw) ? item : null;
+        currentItems = [];
+      } else if (currentSec) {
+        currentItems.push(item._qIdx);
+      }
+    });
+    flushSection();
+    localStorage.setItem(cacheKey, JSON.stringify(POOL_SELECTION));
+  }
+
+  function markDOMPageIndices() {
+    const container = document.getElementById('questionsContainer');
+    const cards    = [...container.querySelectorAll('.q-card')];
+    const dividers = [...container.querySelectorAll('.section-divider')];
+    let cardI = 0, divI = 0;
+    (window.ALL_ITEMS || []).forEach(item => {
+      if (item.type === 'section') {
+        const d = dividers[divI++];
+        if (d) {
+          d.dataset.pageIdx   = item._pageIdx;
+          d.dataset.sectionId = item.id || '';
+          if (item.page_break) d.dataset.isPageBreak = '1';
+        }
+      } else {
+        const c = cards[cardI++];
+        if (c) {
+          c.dataset.pageIdx   = item._pageIdx;
+          c.dataset.sectionId = item._sectionId || '';
+        }
+      }
+    });
+  }
+
+  function renderSectionMedia(section, container) {
+    if (!section || !section.section_media_src) return;
+    const src  = section.section_media_src;
+    const type = section.section_media_type;
+    const mediaDiv = document.createElement('div');
+    mediaDiv.className = 'q-media';
+    mediaDiv.style.marginBottom = '16px';
+    mediaDiv.style.height = '100%';
+    if (type === 'image') {
+      mediaDiv.innerHTML = `<img src="${src}" alt="Section media">`;
+    } else if (type === 'audio') {
+      const aid = 'sec_aud_' + (section.id || 'x');
+      mediaDiv.innerHTML = `
+        <audio id="${aid}" src="${src}" preload="metadata"></audio>
+        <div class="q-audio-player">
+          <svg class="q-audio-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+          <button class="q-audio-play" type="button" aria-label="Lecture"><svg width="14" height="14" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" fill="white"/></svg></button>
+          <button class="q-audio-replay" type="button" aria-label="Rejouer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg></button>
+          <span class="q-audio-time">0:00 / --:--</span>
+        </div>`;
+      const audio    = mediaDiv.querySelector('audio');
+      const playBtn  = mediaDiv.querySelector('.q-audio-play');
+      const replayBtn = mediaDiv.querySelector('.q-audio-replay');
+      const timeEl   = mediaDiv.querySelector('.q-audio-time');
+      function fmtT(s) { if (!isFinite(s)||isNaN(s)) return '--:--'; return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'); }
+      audio.addEventListener('loadedmetadata', () => { timeEl.textContent = '0:00 / '+fmtT(audio.duration); });
+      audio.addEventListener('timeupdate', () => { timeEl.textContent = fmtT(audio.currentTime)+' / '+fmtT(audio.duration); });
+      audio.addEventListener('play', () => { playBtn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" fill="white"/><rect x="14" y="4" width="4" height="16" fill="white"/></svg>'; armSafeBlur(3000); }, {passive:true});
+      audio.addEventListener('pause', () => { playBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" fill="white"/></svg>'; });
+      audio.addEventListener('ended', () => { playBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" fill="white"/></svg>'; });
+      playBtn.addEventListener('click', () => { audio.paused ? audio.play() : audio.pause(); });
+      replayBtn.addEventListener('click', () => { audio.currentTime = 0; audio.play(); });
+    } else if (type === 'video') {
+      if (src.includes('youtube')||src.includes('youtu.be')||src.includes('vimeo')) {
+        let embedUrl = src;
+        if (src.includes('watch?v=')) embedUrl = 'https://www.youtube.com/embed/'+src.split('watch?v=')[1].split('&')[0];
+        else if (src.includes('youtu.be/')) embedUrl = 'https://www.youtube.com/embed/'+src.split('youtu.be/')[1];
+        mediaDiv.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+        mediaDiv.addEventListener('click', () => armSafeBlur(4000));
+      } else {
+        mediaDiv.innerHTML = `<video controls src="${src}" style="width:100%;display:block;"></video>`;
+        mediaDiv.querySelector('video').addEventListener('play', () => armSafeBlur(3000));
+      }
+    } else if (type === 'pdf') {
+      fetch(src)
+        .then(r => r.blob())
+        .then(async blob => {
+          const blobUrl = URL.createObjectURL(blob);
+          const isMobile = window.matchMedia('(max-width: 768px)').matches;
+          if (isMobile) {
+            // Lazy-load PDF.js only on mobile, only when a PDF is present
+            if (!window.pdfjsLib) {
+              await new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+                s.onload = resolve; s.onerror = reject;
+                document.head.appendChild(s);
+              });
+              window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            }
+            const pdf = await window.pdfjsLib.getDocument(blobUrl).promise;
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'width:100%;';
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+              const page = await pdf.getPage(pageNum);
+              const baseViewport = page.getViewport({ scale: 1 });
+              const containerWidth = mediaDiv.clientWidth || window.innerWidth;
+              const scale = (containerWidth / baseViewport.width) * (window.devicePixelRatio || 1);
+              const viewport = page.getViewport({ scale });
+              const canvas = document.createElement('canvas');
+              canvas.width = viewport.width;
+              canvas.height = viewport.height;
+              canvas.style.cssText = 'width:100%;display:block;margin-bottom:2px;';
+              await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+              wrapper.appendChild(canvas);
+            }
+            mediaDiv.style.height = 'auto';
+            mediaDiv.appendChild(wrapper);
+          } else {
+            // Desktop: iframe suppresses Chrome sidebar (#navpanes=0) and toolbar (#toolbar=0)
+            mediaDiv.innerHTML = `<iframe src="${blobUrl}#navpanes=0&toolbar=0" style="width:100%;height:100%;display:block;border:none;"></iframe>`;
+            mediaDiv.addEventListener('click', () => armSafeBlur(4000));
+          }
+        })
+        .catch(() => {
+          mediaDiv.innerHTML = `<div style="padding:16px;background:#fef9c3;border:1px solid #fde68a;font-size:0.9rem;color:#92400e;">Le document PDF n'a pas pu être affiché.</div>`;
+        });
+    }
+    container.appendChild(mediaDiv);
+  }
+
+  function showPage(n) {
+    if (n < 0 || n >= PAGES.length) return;
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    const qc = document.getElementById('questionsContainer');
+    if (qc) qc.scrollTop = 0;
+    const sm = document.getElementById('sectionMediaTop');
+    if (sm) sm.scrollTop = 0;
+    currentPage = n;
+    const page = PAGES[n];
+    const container = document.getElementById('questionsContainer');
+
+    // Show/hide question cards by page and pool selection
+    container.querySelectorAll('.q-card').forEach(card => {
+      const onPage   = parseInt(card.dataset.pageIdx) === n;
+      const qIdx     = parseInt(card.dataset.idx);
+      const secId    = card.dataset.sectionId;
+      const poolList = POOL_SELECTION[secId];
+      const inPool   = poolList !== undefined;
+      const selected = !inPool || poolList.includes(qIdx);
+      card.style.display = (onPage && selected) ? '' : 'none';
+    });
+
+    // Show/hide section dividers — hide page-break dividers (rendered as page headings)
+    container.querySelectorAll('.section-divider').forEach(div => {
+      const onPage = parseInt(div.dataset.pageIdx) === n;
+      div.style.display = (onPage && div.dataset.isPageBreak !== '1') ? '' : 'none';
+    });
+
+    // Section attachment — two-column layout when attachment present
+    const mediaTop   = document.getElementById('sectionMediaTop');
+    const splitRow   = document.getElementById('sectionSplitRow');
+    const pageHeader = document.getElementById('sectionPageHeader');
+    mediaTop.innerHTML   = '';
+    pageHeader.innerHTML = '';
+    splitRow.classList.remove('has-attachment');
+
+    if (page.leadSection && page.leadSection.section_media_src) {
+      const h = document.createElement('div');
+      h.className = 'sec-page-title';
+      h.textContent = page.leadSection.question_text || '';
+      pageHeader.appendChild(h);
+      if (page.leadSection.option_a) {
+        const p = document.createElement('div');
+        p.className = 'sec-page-instr';
+        p.innerHTML = page.leadSection.option_a || '';
+        pageHeader.appendChild(p);
+      }
+      renderSectionMedia(page.leadSection, mediaTop);
+      splitRow.classList.add('has-attachment');
+    } else if (page.leadSection) {
+      renderSectionMedia(page.leadSection, mediaTop);
+    }
+
+    // Answer persistence notice — always visible during exam
+    const notice = document.getElementById('answerPersistNotice');
+    notice.textContent = UI.answerPersistNotice;
+    notice.style.display = 'block';
+
+    // Page navigation buttons
+    const pageNav    = document.getElementById('pageNav');
+    const prevBtn    = document.getElementById('pagePrevBtn');
+    const nextBtn    = document.getElementById('pageNextBtn');
+    const submitRow  = document.getElementById('submitBtnRow');
+    if (PAGES.length > 1) {
+      pageNav.style.display = 'flex';
+      submitRow.style.display = 'none';
+      prevBtn.style.display = n > 0 ? '' : 'none';
+      prevBtn.textContent = UI.prevSection;
+      prevBtn.onclick = () => showPage(n - 1);
+      if (n === PAGES.length - 1) {
+        nextBtn.textContent = UI.submitBtn || 'Envoyer ma copie →';
+        nextBtn.onclick = () => {
+          console.log('submit onclick fired', { examSubmitted, n, pagesLen: PAGES.length });
+          if (examSubmitted) return;
+          if (lastSubmitAttempt !== 0 && Date.now() - lastSubmitAttempt < 30000) return;
+          lastSubmitAttempt = Date.now();
+          const visibleUnans = [...document.querySelectorAll('.q-card')]
+            .filter(c => c.style.display !== 'none' && !c.classList.contains('answered')).length;
+          if (visibleUnans > 0) {
+            showUnansweredModal(visibleUnans); return;
+          }
+          submitExam();
+        };
+      } else {
+        nextBtn.textContent = UI.nextSection;
+        nextBtn.onclick = () => showPage(n + 1);
+      }
+    } else {
+      pageNav.style.display = 'none';
+      submitRow.style.display = '';
+    }
+    document.getElementById('qNav').style.display = PAGES.length > 1 ? 'none' : '';
+
+    updateProgress();
+  }
+
+  function updateWordCount(ta, card) {
+    const words = (ta.value || '').trim().split(/\s+/).filter(Boolean).length;
+    const countEl = card.querySelector('.wc-count');
+    const hintEl  = card.querySelector('.wc-hint');
+    if (countEl) countEl.textContent = 'Mots : ' + words;
+    if (hintEl) {
+      hintEl.className = 'wc-hint ' + (words === 0 ? 'hint-neutral' : words >= 50 ? 'hint-ok' : 'hint-neutral');
+      hintEl.textContent = words === 0 ? 'Rédigez votre réponse' : words + ' mots';
+    }
+  }
+
+  function updateQuillWordCount(quill, card) {
+    const words = quill.getText().trim().split(/\s+/).filter(Boolean).length;
+    const countEl = card.querySelector('.wc-count');
+    const hintEl  = card.querySelector('.wc-hint');
+    if (countEl) countEl.textContent = 'Mots : ' + words;
+    if (hintEl) {
+      hintEl.className = 'wc-hint ' + (words >= 50 ? 'hint-ok' : 'hint-neutral');
+      hintEl.textContent = words === 0 ? 'Rédigez votre réponse' : words + ' mots';
+    }
+  }
+
+  function updateProgress() {
+    const total    = VISIBLE_TOTAL > 0 ? VISIBLE_TOTAL : QUESTIONS.length;
+    const answered = document.querySelectorAll('.q-card.answered').length;
+    const pct = total > 0 ? Math.round(answered / total * 100) : 0;
+    document.getElementById('progressFill').style.width  = pct + '%';
+    document.getElementById('progressLabel').textContent = answered + ' / ' + total + ' questions répondues';
+    updateNavigator();
+  }
+
+  function updateProgressText(idx) {
+    const el = document.getElementById('qProgressMobile');
+    if (el) el.textContent = 'Question ' + (idx + 1) + ' ' + UI.questionOf + ' ' + (VISIBLE_TOTAL > 0 ? VISIBLE_TOTAL : QUESTIONS.length);
+  }
+
+  function setupScrollProgress() {
+    if (!('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) updateProgressText(parseInt(entry.target.dataset.idx, 10));
+      });
+    }, { rootMargin: '-40% 0px -40% 0px' });
+    document.querySelectorAll('.q-card[data-idx]').forEach(card => observer.observe(card));
+  }
+
+  function buildNavigator() {
+    const nav = document.getElementById('qNav');
+    if (!nav) return;
+    nav.innerHTML = QUESTIONS.map((q, i) => {
+      const isOpen = q.type === 'open';
+      return `<div class="q-dot${isOpen ? ' dot-open' : ''}" id="dot-${i}" title="Question ${i+1}" onclick="jumpToQuestion(${i})">${i+1}</div>`;
+    }).join('');
+    updateProgressText(0);
+    setupScrollProgress();
+  }
+
+  function updateNavigator() {
+    QUESTIONS.forEach((q, i) => {
+      const dot  = document.getElementById('dot-' + i);
+      const card = document.querySelector(`.q-card[data-idx="${i}"]`);
+      if (dot && card) {
+        dot.classList.toggle('dot-answered', card.classList.contains('answered'));
+      }
+    });
+  }
+
+  function jumpToQuestion(idx) {
+    updateProgressText(idx);
+    const card = document.querySelector(`.q-card[data-idx="${idx}"]`);
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // ============================================================
+  //  TIMER
+  // ============================================================
+  function startTimer() {
+    clearInterval(timerInterval);
+    const el = document.getElementById('timer');
+    timerInterval = setInterval(() => {
+      const rem = Math.max(0, Math.floor((examDeadline - Date.now()) / 1000));
+      const m = Math.floor(rem / 60), s = rem % 60;
+      el.textContent = 'Temps : ' + m + ':' + String(s).padStart(2, '0');
+      const low = rem <= 300;
+      el.style.background = low ? 'linear-gradient(135deg,#dc2626,#b91c1c)' : 'linear-gradient(135deg,#2563eb,#1d4ed8)';
+      if (rem <= 0) { clearInterval(timerInterval); submitExam('Temps écoulé — envoi automatique.'); }
+    }, 1000);
+  }
+
+  // ============================================================
+  //  ANTI-CHEAT
+  // ============================================================
+  function armSafeBlur(ms = 1200) {
+    const MAX_SAFE = 4000;
+    safeBlurUntil = Date.now() + Math.min(ms, MAX_SAFE);
+  }
+  function suspendAntiCheat(ms, reason) {
+    antiCheatSuspendedUntil = Date.now() + ms;
+    if (ms > 5000) logEvent('Anti-cheat suspendu', `${reason} — ${ms}ms`);
+  }
+  function logEvent(label, detail) {
+    sessionEvents.push({ time: new Date().toLocaleTimeString('fr-FR'), label, detail });
+    const beaconWorthy = ['violation', 'anti-cheat', 'copie', 'collage', 'paste', 'copy', 'suspendu', 'terminé', 'soumis'];
+    if (attemptId && beaconWorthy.some(k => (label + (detail || '')).toLowerCase().includes(k))) {
+      navigator.sendBeacon(
+        `${EF_BASE}/log-event`,
+        JSON.stringify({ attempt_id: attemptId, time: Date.now(), label, detail })
+      );
+    }
+  }
+
+  function setOverlayActive(active) {
+    document.body.classList.toggle('overlay-active', active);
+  }
+
+  function askToExit(reason, source) {
+    if (!examActive || examSubmitted || exitPromptOpen) return;
+    if (false) return; // reserved
+    if (Date.now() < antiCheatSuspendedUntil) return;
+
+    violationCount++;
+
+    if (violationCount >= MAX_VIOLATIONS) {
+      logEvent('Anti-cheat limit reached', source + ' – auto-submitted');
+      if (exitCountdownTimer) { clearInterval(exitCountdownTimer); exitCountdownTimer = null; }
+      document.getElementById('exitOverlay').style.display = 'none';
+      setOverlayActive(false);
+      alert('L\'épreuve a été automatiquement envoyée après 3 sorties de l\'écran.');
+      submitExam('Anti-cheat : 3 évènements – envoi automatique.');
+      return;
+    }
+
+    exitPromptOpen = true;
+    document.getElementById('exitOverlayStrike').textContent = 'AVERTISSEMENT ' + violationCount + ' / ' + MAX_WARNINGS;
+    document.getElementById('exitOverlayMsg').textContent = (reason || 'Vous avez quitté l\'écran.') +
+      ' Avertissement ' + violationCount + ' sur ' + MAX_WARNINGS + '. Au-delà, l\'épreuve sera envoyée automatiquement.';
+    document.getElementById('exitOverlay').style.display = 'flex';
+    setOverlayActive(true);
+
+    exitSecondsRemaining = 15;
+    document.getElementById('exitOverlayCountText').textContent = 'Vous avez ' + exitSecondsRemaining + ' secondes pour revenir.';
+    document.getElementById('exitOverlayCountDig').textContent  = exitSecondsRemaining;
+
+    if (exitCountdownTimer) clearInterval(exitCountdownTimer);
+    exitCountdownTimer = setInterval(() => {
+      exitSecondsRemaining--;
+      document.getElementById('exitOverlayCountText').textContent = 'Vous avez ' + exitSecondsRemaining + ' secondes pour revenir.';
+      document.getElementById('exitOverlayCountDig').textContent  = exitSecondsRemaining;
+      if (exitSecondsRemaining <= 0) {
+        clearInterval(exitCountdownTimer); exitCountdownTimer = null;
+        exitPromptOpen = false;
+        document.getElementById('exitOverlay').style.display = 'none';
+        setOverlayActive(false);
+        terminateExam('Vous n\'êtes pas revenu à temps.');
+      }
+    }, 1000);
+
+    logEvent('Exit warning shown', source + ' – violation #' + violationCount);
+  }
+
+  function collectCurrentAnswers() {
+    const answers = {};
+    QUESTIONS.forEach((q, idx) => {
+      if (q.type === 'mcq') {
+        const checked = document.querySelector(`input[name="q${idx}"]:checked`);
+        const selectedLabel = checked ? checked.closest('label') : null;
+        answers['q' + idx] = selectedLabel ? parseInt(selectedLabel.dataset.originalIndex) : -1;
+      } else if (q.type === 'open') {
+        const card = document.querySelector(`.q-card[data-idx="${idx}"]`);
+        const quill = card ? card._quill : null;
+        answers['q' + idx] = quill ? quill.root.innerHTML : '';
+      }
+    });
+    return answers;
+  }
+
+  function startAutosave() {
+    if (autosaveTimer) clearInterval(autosaveTimer);
+    autosaveTimer = setInterval(async () => {
+      if (!attemptId || !sessionToken || examSubmitted || !examActive) return;
+      const currentAnswers = collectCurrentAnswers();
+      const answersJson = JSON.stringify(currentAnswers);
+      if (answersJson === lastSavedAnswers) return;
+      try {
+        await efFetch('exam-autosave', {
+          attempt_id:       attemptId,
+          session_token:    sessionToken,
+          answers_json:     currentAnswers,
+          last_autosave_at: new Date().toISOString()
+        });
+        lastSavedAnswers = answersJson;
+      } catch (e) {
+        // silent failure — never interrupt the student
+      }
+    }, 30000);
+  }
+
+  function terminateExam(msg) {
+    if (!examActive) return;
+    examActive = false;
+    if (autosaveTimer) { clearInterval(autosaveTimer); autosaveTimer = null; }
+    clearInterval(timerInterval);
+    if (exitCountdownTimer) { clearInterval(exitCountdownTimer); exitCountdownTimer = null; }
+    setOverlayActive(false);
+    logEvent('Exam terminated', msg);
+    localStorage.setItem(TERMINATED_KEY, '1');
+    localStorage.removeItem('examAttemptId_' + (EXAM ? EXAM.share_id : ''));
+    localStorage.removeItem('examShuffleCache_' + (EXAM ? EXAM.share_id : ''));
+    localStorage.removeItem('examSessionToken_' + (EXAM ? EXAM.share_id : ''));
+    alert(msg || 'L\'épreuve est terminée.');
+    showTerminated();
+  }
+
+  document.getElementById('exitOverlayStay').addEventListener('click', () => {
+    if (exitCountdownTimer) { clearInterval(exitCountdownTimer); exitCountdownTimer = null; }
+    suspendAntiCheat(2000, 'exitOverlayStay');
+    exitPromptOpen = false;
+    document.getElementById('exitOverlay').style.display = 'none';
+    setOverlayActive(false);
+    logEvent('Student returned', 'After warning #' + violationCount);
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+  });
+
+  document.getElementById('exitOverlayLeave').addEventListener('click', () => {
+    if (exitCountdownTimer) { clearInterval(exitCountdownTimer); exitCountdownTimer = null; }
+    exitPromptOpen = false;
+    document.getElementById('exitOverlay').style.display = 'none';
+    setOverlayActive(false);
+    terminateExam('Vous avez choisi de quitter l\'épreuve.');
+  });
+
+  // Anti-cheat event listeners
+  document.addEventListener('visibilitychange', () => {
+    if (isStartingExam || !examActive || examSubmitted) return;
+    if (Date.now() < antiCheatSuspendedUntil) return;
+    if (!document.hidden) return;
+    if (isMobile) {
+      const ae = document.activeElement;
+      if (ae && (ae.tagName === 'TEXTAREA' || ae.tagName === 'INPUT')) return;
+      // 500ms confirmation: brief keyboard dismissal should not count as exit
+      setTimeout(() => {
+        if (!examActive || examSubmitted) return;
+        if (!document.hidden) return;
+        logEvent('Visibility lost', 'visibilitychange');
+        askToExit('Vous avez quitté l\'écran.', 'visibilitychange');
+      }, 500);
+      return;
+    }
+    logEvent('Visibility lost', 'visibilitychange');
+    askToExit('Vous avez quitté l\'écran.', 'visibilitychange');
+  });
+  window.addEventListener('blur', () => {
+    if (isStartingExam || !examActive || examSubmitted) return;
+    if (Date.now() < safeBlurUntil || Date.now() < antiCheatSuspendedUntil) return;
+    if (isMobile) {
+      const ae = document.activeElement;
+      if (ae && (ae.tagName === 'TEXTAREA' || ae.tagName === 'INPUT')) return;
+    }
+    logEvent('Window blur', 'blur');
+    askToExit('Vous avez quitté la fenêtre.', 'blur');
+  });
+  document.addEventListener('fullscreenchange', () => {
+    if (!examActive || examSubmitted || isStartingExam) return;
+    if (Date.now() < antiCheatSuspendedUntil) return;
+    if (!document.fullscreenElement) { logEvent('Fullscreen exited', 'fullscreenchange'); askToExit('Vous avez quitté le plein écran.', 'fullscreenchange'); }
+  });
+  document.addEventListener('keydown', e => {
+    if ((e.key === 'Escape' || e.key === 'Esc') && examActive && !isStartingExam && !examSubmitted) {
+      if (Date.now() < antiCheatSuspendedUntil) return;
+      e.preventDefault();
+      logEvent('Escape pressed', 'keydown');
+      askToExit('Vous avez appuyé sur Échap.', 'keydown(Escape)');
+    }
+    // Screenshot key detection
+    if (examActive && !examSubmitted) {
+      if (e.key === 'PrintScreen') {
+        logEvent('Screenshot key pressed', 'PrintScreen');
+      }
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && ['3','4','5','s'].includes(e.key.toLowerCase())) {
+        logEvent('Screenshot shortcut', `${e.metaKey ? 'Cmd' : 'Ctrl'}+Shift+${e.key.toUpperCase()}`);
+      }
+    }
+  });
+
+  // Global copy attempt — question text is protected by user-select:none
+  // but log any Ctrl+C / Cmd+C so teacher can see the attempt
+  document.addEventListener('copy', e => {
+    if (!examActive || examSubmitted) return;
+    if (Date.now() < antiCheatSuspendedUntil) return;
+    const sel = window.getSelection()?.toString() || '';
+    logEvent('Copy attempt', sel.length > 0 ? `${sel.length} chars copied` : 'no content selected (question text protected)');
+  });
+
+  // Language sentinel
+  const sentinel = document.getElementById('langSentinel');
+  const sentinelBaseline = sentinel ? sentinel.textContent.trim() : null;
+  if (sentinel && sentinelBaseline) {
+    setInterval(() => {
+      if (!examActive || examSubmitted) return;
+      if (sentinel.textContent.trim() !== sentinelBaseline) {
+        askToExit('Traduction automatique détectée.', 'translationWatch');
+      }
+    }, 2000);
+  }
+
+  // ============================================================
+  //  SUBMIT
+  // ============================================================
+  document.getElementById('submitBtn').addEventListener('click', () => {
+    if (examSubmitted) return;
+    if (lastSubmitAttempt !== 0 && Date.now() - lastSubmitAttempt < 30000) return;
+    lastSubmitAttempt = Date.now();
+    const unanswered = QUESTIONS.length - document.querySelectorAll('.q-card.answered').length;
+    if (unanswered > 0) {
+      showUnansweredModal(unanswered); return;
+    }
+    submitExam();
+  });
+
+  function showUnansweredModal(count) {
+    const ui = window.UI || getUIStrings('fr');
+    document.getElementById('unansweredModalTitle').textContent  = ui.unansweredTitle;
+    document.getElementById('unansweredModalMsg').textContent    = ui.unansweredMsg.replace('{n}', count);
+    document.getElementById('unansweredModalCancel').textContent = ui.unansweredCancel;
+    document.getElementById('unansweredModalSubmit').textContent = ui.unansweredSubmit;
+    document.getElementById('unansweredModal').style.display = 'flex';
+  }
+  document.getElementById('unansweredModalCancel').addEventListener('click', () => {
+    suspendAntiCheat(2000, 'unansweredModalCancel');
+    document.getElementById('unansweredModal').style.display = 'none';
+  });
+  document.getElementById('unansweredModalSubmit').addEventListener('click', () => {
+    suspendAntiCheat(2000, 'unansweredModalSubmit');
+    document.getElementById('unansweredModal').style.display = 'none';
+    submitExam();
+  });
+
+  async function submitExam(autoReason) {
+    console.log('submitExam called', { attemptId, sessionToken, examSubmitted, autoReason });
+    if (examSubmitted) { console.log('submitExam: already submitted, returning'); return; }
+    examSubmitted = true;
+    examActive = false;
+    if (autosaveTimer) { clearInterval(autosaveTimer); autosaveTimer = null; }
+    clearInterval(timerInterval);
+
+    // Show immediate feedback — don't leave user waiting silently
+    const btn = document.getElementById('submitBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Envoi en cours — merci de patienter…'; }
+
+    console.log('submitExam: past guard');
+
+    if (!attemptId || !sessionToken) {
+      console.error('submitExam: missing session credentials');
+      examSubmitted = false;
+      examActive = true;
+      if (btn) { btn.disabled = false; btn.textContent = 'Envoyer ma copie →'; }
+      alert('Une erreur est survenue. Veuillez contacter votre enseignant.');
+      return;
+    }
+
+    console.log('credentials OK, calling exam-submit');
+    logEvent('Exam submitted', autoReason || 'Student clicked submit');
+    console.log('submitExam started', { student: studentName, email: studentEmail });
+
+    // Collect answers — MCQ scoring is server-side only (correct_index never sent to client)
+    const answers = {};
+    let partBRows = '';
+
+    QUESTIONS.forEach((q, idx) => {
+      if (q.type === 'open') {
+        const card = document.querySelector(`.q-card[data-idx="${idx}"]`);
+        const quill = card ? card._quill : null;
+        const text = quill ? quill.getText().trim() : '';
+        answers['q' + idx] = text ? quill.root.innerHTML : '';
+      } else {
+        const checked = document.querySelector(`input[name="q${idx}"]:checked`);
+        const selectedLabel = checked ? checked.closest('label') : null;
+        const selected = selectedLabel ? parseInt(selectedLabel.dataset.originalIndex) : -1;
+        answers['q' + idx] = selected;
+        const opts = [q.option_a, q.option_b, q.option_c, q.option_d];
+        partBRows += `<tr>
+          <td style="padding:8px;border:1px solid #ddd;">Q${idx+1}: ${q.question_text}</td>
+          <td style="padding:8px;border:1px solid #ddd;">${selected >= 0 ? opts[selected] : 'Pas de réponse'}</td>
+        </tr>`;
+      }
+    });
+
+    // Open question responses
+    let openRowsHTML = '';
+    QUESTIONS.forEach((q, idx) => {
+      if (q.type === 'open') {
+        const resp = answers['q' + idx] || '';  // HTML from Quill — no escaping needed
+        openRowsHTML += `
+          <div style="margin-bottom:20px;">
+            <div style="font-size:13px;font-weight:600;color:#0f172a;margin-bottom:6px;">Q${idx+1}: ${q.question_text}</div>
+            <div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;font-size:13px;line-height:1.7;background:#f8f9fc;">
+              ${resp || '<em style="color:#94a3b8;">Pas de réponse</em>'}
+            </div>
+            <div style="border:2px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-top:8px;background:#f8f9fc;">
+              <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Commentaire enseignant</div>
+              <div style="min-height:50px;">&nbsp;</div>
+            </div>
+          </div>`;
+      }
+    });
+
+    // Session log
+    const sessionRows = sessionEvents.map(e => `<tr>
+      <td style="padding:6px 8px;border:1px solid #ddd;">${e.time}</td>
+      <td style="padding:6px 8px;border:1px solid #ddd;">${e.label}</td>
+      <td style="padding:6px 8px;border:1px solid #ddd;">${e.detail}</td>
+    </tr>`).join('');
+
+    const mcqCount  = QUESTIONS.filter(q => q.type === 'mcq').length;
+    const openCount = QUESTIONS.filter(q => q.type === 'open').length;
+
+    const htmlReport = `
+      <h2 style="color:#004080;margin:0 0 4px 0;">${EXAM.title}</h2>
+      <h3 style="color:#1e293b;margin:0 0 16px 0;font-weight:500;">${studentName}</h3>
+      <table style="border-collapse:collapse;width:100%;max-width:440px;font-size:14px;margin-bottom:20px;background:#f8f9fc;">
+        <tr><td style="padding:6px 12px;"><b>Email:</b></td><td style="padding:6px 12px;">${studentEmail}</td></tr>
+        <tr><td style="padding:6px 12px;"><b>Durée:</b></td><td style="padding:6px 12px;">${EXAM.duration_mins} min</td></tr>
+      </table>
+      <hr style="border:none;border-top:2px solid #e2e8f0;margin:0 0 16px 0;">
+      ${mcqCount > 0 ? `
+        <h3 style="color:#004080;margin:0 0 8px 0;">Questions QCM — ${mcqCount} question(s)</h3>
+        <table style="border-collapse:collapse;width:100%;font-size:13px;margin-bottom:20px;">
+          <thead><tr style="background:#004080;color:#fff;text-align:left;">
+            <th style="padding:8px 10px;border:1px solid #003060;">Question</th>
+            <th style="padding:8px 10px;border:1px solid #003060;">Réponse du candidat</th>
+          </tr></thead>
+          <tbody>${partBRows}</tbody>
+        </table>` : ''}
+      ${openCount > 0 ? `
+        <h3 style="color:#7c3aed;margin:0 0 12px 0;">Questions rédigées — Correction enseignant</h3>
+        ${openRowsHTML}` : ''}
+      <hr style="border:none;border-top:2px solid #e2e8f0;margin:16px 0;">
+      <h4 style="color:#004080;margin:0 0 8px 0;">Journal de session</h4>
+      ${sessionEvents.length > 0 ? `
+        <table style="border-collapse:collapse;width:100%;font-size:12px;">
+          <thead><tr style="background:#f3f4f6;text-align:left;">
+            <th style="padding:6px 8px;border:1px solid #ddd;">Heure</th>
+            <th style="padding:6px 8px;border:1px solid #ddd;">Évènement</th>
+            <th style="padding:6px 8px;border:1px solid #ddd;">Détail</th>
+          </tr></thead>
+          <tbody>${sessionRows}</tbody>
+        </table>` : '<p style="font-size:12px;color:#6b7280;">Aucun incident détecté.</p>'}`;
+
+    // Submit to server — grading is fully server-side, score_mcq computed by exam-submit
+    // Dismiss on-screen keyboard before fetch — iOS cancels fetch during viewport resize on key close
+    if (document.activeElement) document.activeElement.blur();
+    await new Promise(r => setTimeout(r, 150));
+    let serverConfirmed = false;
+    try {
+      await efFetch('exam-submit', {
+        attempt_id:     attemptId,
+        session_token:  sessionToken,
+        answers:        answers,
+        session_log:    sessionEvents,
+        pool_selection: Object.keys(POOL_SELECTION).length > 0 ? POOL_SELECTION : null,
+      });
+      serverConfirmed = true;
+      console.log('exam-submit response received');
+    } catch (err) {
+      console.error('exam-submit failed', err);
+    }
+
+    if (!serverConfirmed) {
+      examSubmitted = false;
+      examActive = true;
+      if (btn) { btn.disabled = false; btn.textContent = 'Envoyer ma copie →'; }
+      alert('Une erreur est survenue lors de l\'envoi. Vérifiez votre connexion et réessayez.');
+      return;
+    }
+
+    // Lock student out after submission
+    localStorage.setItem('submitted_' + EXAM.share_id, '1');
+    localStorage.removeItem('examDeadline_' + EXAM.share_id);
+    localStorage.removeItem('examAttemptId_' + EXAM.share_id);
+    localStorage.removeItem('examShuffleCache_' + EXAM.share_id);
+    localStorage.removeItem('examSessionToken_' + EXAM.share_id);
+    localStorage.removeItem('poolSelectionCache_' + EXAM.share_id + '_' + attemptId);
+    localStorage.removeItem('poolSelectionCache_' + EXAM.share_id);
+
+    // Show success
+    console.log('showing success screen');
+    document.getElementById('examScreen').style.display    = 'none';
+    document.getElementById('successScreen').style.display = 'block';
+    document.getElementById('timer').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const statusEl = document.getElementById('emailStatus');
+    if (statusEl) statusEl.textContent = (window.UI || getUIStrings('fr')).successEmail;
+  }
+
+  // ── Zone 1: pre-exam language picker ──────────────────────────
+  function lockGroupFromUrl() {
+    if (!urlGroup) return;
+    const select = document.getElementById('inputGroup');
+    if (!select) return;
+    const vals = Array.from(select.options).map(o => o.value);
+    if (!vals.includes(urlGroup)) return;
+    select.value = urlGroup;
+    select.style.display = 'none';
+    const fixed = document.getElementById('groupFixed');
+    if (fixed) { fixed.textContent = urlGroup; fixed.style.display = 'block'; }
+  }
+
+  function applyUIStrings(lang) {
+    const UI = getUIStrings(lang);
+    window.UI = UI;
+
+    // Populate groups dropdown
+    const groups = (window._examGroupsRaw || '').split(',').map(g => g.trim()).filter(Boolean);
+    if (groups.length > 0) {
+      const select = document.getElementById('inputGroup');
+      const row    = document.getElementById('groupRow');
+      if (select) {
+        select.innerHTML = `<option value="">${UI.selectGroup}</option>` +
+          groups.map(g => `<option value="${g}">${g}</option>`).join('');
+        select.style.display = '';
+        const fixed = document.getElementById('groupFixed');
+        if (fixed) fixed.style.display = 'none';
+      }
+      if (row) row.style.display = 'block';
+    }
+
+    document.getElementById('loginTitle').textContent    = UI.loginCardTitle;
+    document.getElementById('loginSub').textContent      = `${UI.loginSub} ${(window.EXAM && EXAM.duration_mins) || '—'} ${UI.minutes}`;
+    document.getElementById('labelName').textContent     = UI.labelName;
+    document.getElementById('labelEmail').textContent    = UI.labelEmail;
+    document.getElementById('labelGroup').textContent    = UI.labelGroup;
+    document.getElementById('labelCode').textContent     = UI.labelCode;
+    document.getElementById('loginBtn').textContent      = UI.loginBtn;
+    document.getElementById('inputLastName').placeholder  = UI.placeholderLast;
+    document.getElementById('inputFirstName').placeholder = UI.placeholderFirst;
+    document.getElementById('inputEmail').placeholder     = UI.placeholderEmail;
+    document.getElementById('confirmTitle').textContent        = UI.confirmTitle;
+    document.getElementById('confirmHeading').textContent      = UI.confirmHeading;
+    document.getElementById('confirmWarningTitle').textContent = UI.warningTitle;
+    document.getElementById('confirmRulesTitle').textContent   = UI.rulesTitle;
+    document.getElementById('confirmVerifyLabel').textContent  = UI.verifyLabel;
+    document.getElementById('confirmNameLabel').textContent    = UI.nameLabel;
+    document.getElementById('confirmEmailLabel').textContent   = UI.emailLabel;
+    document.getElementById('confirmGroupLabel').textContent   = UI.groupLabel;
+    document.getElementById('confirmAcknowledgeLabel').innerHTML = UI.acknowledgeLabel;
+    document.getElementById('mobileNotifNotice').textContent = UI.mobileNotifNotice;
+    const editNoteEl = document.getElementById('confirmEditNote');
+    if (editNoteEl) editNoteEl.textContent = UI.editNote;
+    document.getElementById('confirmBackBtn').textContent      = UI.backBtn;
+    document.getElementById('rulesBackBtn').textContent        = UI.backBtn;
+    document.getElementById('confirmContinueBtn').textContent  = UI.continueBtn;
+    document.getElementById('confirmStartBtn').textContent     = UI.startBtn;
+    [1,2,3,4,5].forEach(i => {
+      const el = document.getElementById('cw' + i);
+      if (el) el.innerHTML = UI['cw' + i];
+    });
+    const monTitle = document.getElementById('monitoringTitle');
+    const monList  = document.getElementById('monitoringList');
+    if (monTitle) monTitle.textContent = UI.monitoringTitle;
+    if (monList)  monList.innerHTML = UI.monitoringItems.map(item => `<li>${item}</li>`).join('');
+    const successTitleEl = document.getElementById('successTitle');
+    const successMsgEl   = document.getElementById('successMsg');
+    if (successTitleEl) successTitleEl.textContent = UI.successTitle;
+    if (successMsgEl)   successMsgEl.textContent   = UI.successMsg;
+
+    // Update translation-block overlay copy
+    const blockTitle = lang === 'en'
+      ? 'Translation not permitted'
+      : 'Traduction non autorisée';
+    const blockMsg = lang === 'en'
+      ? 'Page translation is not allowed during this exam. Please disable browser translation and reload the page.'
+      : 'La traduction de la page n\'est pas autorisée pendant cette épreuve. Désactivez la traduction de votre navigateur et rechargez la page.';
+    const t = document.getElementById('transBlockTitle');
+    const m = document.getElementById('transBlockMsg');
+    if (t) t.textContent = blockTitle;
+    if (m) m.textContent = blockMsg;
+  }
+
+  function setPreExamLang(lang) {
+    uiLang = lang;
+    document.getElementById('plpFR').classList.toggle('active', lang === 'fr');
+    document.getElementById('plpEN').classList.toggle('active', lang === 'en');
+    applyUIStrings(lang);
+    lockGroupFromUrl();
+  }
+
+  // ── Zone 2: anti-translation observer ─────────────────────────
+  (function() {
+    var obs = new MutationObserver(function(muts) {
+      for (var i = 0; i < muts.length; i++) {
+        var m = muts[i];
+        if (m.attributeName === 'class') {
+          var cl = document.documentElement.classList;
+          if (cl.contains('translated-ltr') || cl.contains('translated-rtl')) {
+            sessionEvents.push({ type: 'translation_detected', timestamp: new Date().toISOString() });
+            document.getElementById('translationBlockOverlay').classList.add('show');
+            break;
+          }
+        }
+      }
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  })();
+
+  // ============================================================
+  //  INIT
+  // ============================================================
+  document.addEventListener('contextmenu', e => e.preventDefault(), { capture: true });
+
+  boot();
+  </script>
+</body>
+</html>
